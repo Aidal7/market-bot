@@ -10,16 +10,24 @@ import config
 intents = discord.Intents.default()
 intents.message_content = True  # Wajib diaktifkan agar bot bisa membaca pesan user
 
-# Inisialisasi Bot dengan prefix "!" (bisa diganti sesuai kebutuhan)
-bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
-
 @bot.event
 async def on_ready():
-    """Event ini terpanggil saat bot berhasil login dan terhubung ke Discord."""
     print("=========================================")
     print(f"✅ Sistem Online: Bot terhubung sebagai {bot.user}")
     print("=========================================")
-    
+
+    # --- TAMBAHKAN BLOK INI UNTUK SINKRONISASI SLASH COMMAND ---
+    try:
+        guild = discord.Object(id=config.GUILD_ID)
+        bot.tree.copy_global_to(guild=guild)
+        synced = await bot.tree.sync(guild=guild)
+        print(f"✅ Berhasil sinkronisasi {len(synced)} slash command(s).")
+        for cmd in synced:
+            print(f"   • /{cmd.name}")
+    except Exception as e:
+        print(f"❌ Gagal melakukan sinkronisasi: {e}")
+    # ----------------------------------------------------------------
+
     # Mengatur status bot saat online (opsional)
     await bot.change_presence(activity=discord.Game(name="Memantau Market Lord Nine"))
 
@@ -27,7 +35,7 @@ async def load_cogs():
     """Fungsi untuk memuat seluruh file command (Cog) dari folder 'cogs'."""
     # Pastikan folder cogs/ ada di direktori yang sama dengan main.py
     if not os.path.exists('./cogs'):
-        print("⚠️ Folder 'cogs' tidak ditemukan!")
+        print("⚠️ Folder 'cogs' tidak ditemukan!"
         return
 
     for filename in os.listdir('./cogs'):
