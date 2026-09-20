@@ -6,31 +6,6 @@ import asyncio
 # Import file config tempat token bot disimpan
 import config
 
-# ============================================================
-# KONFIGURASI INTENTS
-# ============================================================
-intents = discord.Intents.default()
-intents.message_content = True  # Wajib diaktifkan agar bot bisa membaca pesan user
-
-# ============================================================
-# INISIALISASI BOT
-# ============================================================
-bot = commands.Bot(
-    command_prefix="!",
-    intents=intents,
-    help_command=None
-)
-
-# ============================================================
-# EVENT: ON READY
-# ============================================================
-@bot.event
-async def on_ready():
-    print("=========================================")
-    print(f"✅ Sistem Online: Bot terhubung sebagai {bot.user}")
-    print("=========================================")
-
-    # Load JSON catalog dari data/
     try:
         import json_loader
         total = json_loader.load_catalog()
