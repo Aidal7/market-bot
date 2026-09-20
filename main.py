@@ -3,9 +3,37 @@ from discord.ext import commands
 import os
 import asyncio
 
-# Import file config tempat token bot disimpan
+# Import file config
 import config
 
+
+# ============================================================
+# KONFIGURASI INTENTS
+# ============================================================
+intents = discord.Intents.default()
+intents.message_content = True
+
+
+# ============================================================
+# INISIALISASI BOT
+# ============================================================
+bot = commands.Bot(
+    command_prefix="!",
+    intents=intents,
+    help_command=None
+)
+
+
+# ============================================================
+# EVENT: ON READY
+# ============================================================
+@bot.event
+async def on_ready():
+    print("=========================================")
+    print(f"✅ Sistem Online: Bot terhubung sebagai {bot.user}")
+    print("=========================================")
+
+    # Load JSON catalog dari folder data/
     try:
         import json_loader
         total = json_loader.load_catalog()
@@ -13,7 +41,7 @@ import config
     except Exception as e:
         print(f"⚠️ Gagal load catalog: {e}")
 
-    # Sinkronisasi slash command
+    # Sinkronisasi slash command ke guild
     try:
         guild = discord.Object(id=config.GUILD_ID)
         bot.tree.copy_global_to(guild=guild)
@@ -28,32 +56,9 @@ import config
         activity=discord.Game(name="Market Lord Nine")
     )
 
-@bot.event
-async def on_ready():
-    print("=========================================")
-    print(f"✅ Sistem Online: Bot terhubung sebagai {bot.user}")
-    print("=========================================")
-
-    # --- SINKRONISASI SLASH COMMAND KE GUILD ---
-    try:
-        guild = discord.Object(id=config.GUILD_ID)
-        bot.tree.copy_global_to(guild=guild)
-        synced = await bot.tree.sync(guild=guild)
-        print(f"✅ Berhasil sinkronisasi {len(synced)} slash command(s).")
-        for cmd in synced:
-            print(f"   • /{cmd.name}")
-    except Exception as e:
-        print(f"❌ Gagal melakukan sinkronisasi: {e}")
-    # -------------------------------------------
-
-    # Mengatur status bot saat online
-    await bot.change_presence(
-        activity=discord.Game(name="Memantau Market Lord Nine")
-    )
-
 
 # ============================================================
-# LOAD SEMUA COG DARI FOLDER cogs/
+# LOAD SEMUA COG
 # ============================================================
 async def load_cogs():
     """Fungsi untuk memuat seluruh file command (Cog) dari folder 'cogs'."""
@@ -75,17 +80,15 @@ async def load_cogs():
 # ============================================================
 async def main():
     """Fungsi utama untuk menjalankan startup bot secara asinkron."""
-    # 1. Muat semua command dari folder cogs
     await load_cogs()
 
-    # 2. Jalankan bot menggunakan BOT_TOKEN dari config.py
     if hasattr(config, 'BOT_TOKEN') and config.BOT_TOKEN:
         try:
             await bot.start(config.BOT_TOKEN)
         except discord.LoginFailure:
-            print("❌ Token tidak valid. Periksa kembali BOT_TOKEN di config.py!")
+            print("❌ Token tidak valid. Periksa BOT_TOKEN di Wispbyte env var!")
     else:
-        print("❌ Variabel BOT_TOKEN tidak ditemukan di file config.py!")
+        print("❌ Variabel BOT_TOKEN tidak ditemukan di config.py!")
 
 
 # ============================================================
