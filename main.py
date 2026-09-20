@@ -21,10 +21,38 @@ bot = commands.Bot(
     help_command=None
 )
 
-
 # ============================================================
 # EVENT: ON READY
 # ============================================================
+@bot.event
+async def on_ready():
+    print("=========================================")
+    print(f"✅ Sistem Online: Bot terhubung sebagai {bot.user}")
+    print("=========================================")
+
+    # Load JSON catalog dari data/
+    try:
+        import json_loader
+        total = json_loader.load_catalog()
+        print(f"📚 Katalog: {total} item unik siap dipakai.")
+    except Exception as e:
+        print(f"⚠️ Gagal load catalog: {e}")
+
+    # Sinkronisasi slash command
+    try:
+        guild = discord.Object(id=config.GUILD_ID)
+        bot.tree.copy_global_to(guild=guild)
+        synced = await bot.tree.sync(guild=guild)
+        print(f"✅ Berhasil sinkronisasi {len(synced)} slash command(s).")
+        for cmd in synced:
+            print(f"   • /{cmd.name}")
+    except Exception as e:
+        print(f"❌ Gagal sinkronisasi: {e}")
+
+    await bot.change_presence(
+        activity=discord.Game(name="Market Lord Nine")
+    )
+
 @bot.event
 async def on_ready():
     print("=========================================")
